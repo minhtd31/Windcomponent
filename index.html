@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WindCalc">
+<meta name="theme-color" content="#0a0f1a">
+<title>WindCalc</title>
+<style>
+:root {
+  --bg:      #0a0f1a;
+  --panel:   #0f1825;
+  --panel2:  #131e2e;
+  --border:  #1e3a5f;
+  --accent:  #00b4d8;
+  --accent2: #0077b6;
+  --amber:   #f4a226;
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --text:    #e2f0fb;
+  --muted:   #5a7a9a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  min-height: 100dvh;
+  padding-bottom: max(32px, env(safe-area-inset-bottom));
+  background-image:
+    linear-gradient(rgba(0,180,216,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,180,216,0.025) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+}
+
+/* HEADER */
+header {
+  padding: 20px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.logo {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 0 18px rgba(0,180,216,0.35);
+  flex-shrink: 0;
+}
+.title { font-size: 22px; font-weight: 800; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; }
+.subtitle { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+
+/* CARD */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.5;
+}
+.section-label {
+  font-size: 10px; letter-spacing: 2px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* INPUT GROUP */
+.input-group { margin-bottom: 16px; }
+.input-group:last-child { margin-bottom: 0; }
+.input-label {
+  display: block;
+  font-size: 10px; letter-spacing: 2px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.input-row { display: flex; align-items: center; gap: 10px; }
+input[type="number"] {
+  flex: 1;
+  background: var(--panel2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 30px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  padding: 12px 14px;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  caret-color: var(--accent);
+}
+input[type="number"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,180,216,0.12);
+}
+input[type="number"].has-value { border-color: var(--accent2); }
+input[type="number"].err { border-color: var(--red) !important; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+.unit {
+  font-size: 14px; color: var(--muted);
+  min-width: 30px; text-align: left; letter-spacing: 1px;
+}
+.err-msg {
+  font-size: 10px; color: var(--red); margin-top: 5px;
+  display: none;
+}
+.err-msg.show { display: block; }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* BUTTON */
+.btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border: none; border-radius: 12px;
+  color: #fff;
+  font-size: 16px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; margin-bottom: 14px;
+  box-shadow: 0 4px 20px rgba(0,180,216,0.35);
+  transition: transform 0.1s, opacity 0.1s;
+  -webkit-appearance: none;
+}
+.btn:active { transform: scale(0.98); opacity: 0.9; }
+
+/* BANNER */
+.banner {
+  border-radius: 12px; padding: 12px 16px;
+  margin-bottom: 14px;
+  border-left: 3px solid;
+  display: none;
+  animation: fadeUp 0.25s ease;
+}
+.banner.show { display: block; }
+.banner.hw { background: rgba(34,197,94,0.08);  border-color: var(--green); color: #a8f0c4; }
+.banner.tw { background: rgba(239,68,68,0.08);  border-color: var(--red);   color: #fca5a5; }
+.banner.cw { background: rgba(244,162,38,0.08); border-color: var(--amber); color: #fcd48a; }
+.banner-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; margin-bottom: 4px; }
+.banner-body  { font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+
+/* RESULTS */
+.results-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  margin-bottom: 14px;
+  display: none; animation: fadeUp 0.25s ease;
+}
+.results-card.show { display: block; }
+
+.result-row { display: flex; border-bottom: 1px solid var(--border); }
+.result-row:last-child { border-bottom: none; }
+.result-lhs {
+  background: var(--panel2);
+  border-right: 1px solid var(--border);
+  padding: 16px 14px; min-width: 130px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.result-name { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.result-formula { font-size: 9px; color: #2a4a6a; margin-top: 3px; }
+.result-rhs { flex: 1; padding: 16px 14px; }
+.result-num {
+  font-size: 34px; font-weight: 500;
+  font-variant-numeric: tabular-nums; line-height: 1;
+  transition: color 0.3s;
+}
+.result-num .unit2 { font-size: 13px; color: var(--muted); margin-left: 4px; }
+.result-tag {
+  display: inline-flex; align-items: center;
+  margin-top: 7px; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+}
+.tag-hw  { background:rgba(34,197,94,0.15);  color:var(--green); border:1px solid rgba(34,197,94,0.3); }
+.tag-tw  { background:rgba(239,68,68,0.15);  color:var(--red);   border:1px solid rgba(239,68,68,0.3); }
+.tag-cw  { background:rgba(244,162,38,0.15); color:var(--amber); border:1px solid rgba(244,162,38,0.3); }
+.tag-nil { background:rgba(90,122,154,0.15); color:var(--muted); border:1px solid rgba(90,122,154,0.3); }
+.cw-correction { font-size: 10px; color: #a87a30; margin-top: 6px; line-height: 1.4; }
+
+/* WIND ROSE */
+.rose-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px 20px;
+  display: none; animation: fadeUp 0.25s ease;
+}
+.rose-card.show { display: block; }
+.rose-center { display: flex; justify-content: center; margin-top: 12px; }
+canvas { display: block; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">✈</div>
+    <div>
+      <div class="title">WindCalc</div>
+      <div class="subtitle">Wind Component Calculator</div>
+    </div>
+  </header>
+
+  <!-- INPUT -->
+  <div class="card">
+    <div class="section-label">Input Data</div>
+
+    <div class="input-group">
+      <label class="input-label" for="iDir">Wind Direction</label>
+      <div class="input-row">
+        <input type="number" id="iDir" placeholder="230" inputmode="decimal" min="0" max="360">
+        <span class="unit">°</span>
+      </div>
+      <div class="err-msg" id="eDir">Enter 0 – 360°</div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label" for="iSpd">Wind Speed</label>
+      <div class="input-row">
+        <input type="number" id="iSpd" placeholder="15" inputmode="decimal" min="0" max="200">
+        <span class="unit">kts</span>
+      </div>
+      <div class="err-msg" id="eSpd">Enter speed in knots</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="input-group">
+      <label class="input-label" for="iHdg">Aircraft Heading</label>
+      <div class="input-row">
+        <input type="number" id="iHdg" placeholder="270" inputmode="decimal" min="0" max="360">
+        <span class="unit">°</span>
+      </div>
+      <div class="err-msg" id="eHdg">Enter 0 – 360°</div>
+    </div>
+  </div>
+
+  <button class="btn" id="calcBtn">CALCULATE</button>
+
+  <!-- BANNER -->
+  <div class="banner" id="banner">
+    <div class="banner-title" id="bannerTitle"></div>
+    <div class="banner-body"  id="bannerBody"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-card" id="resultsCard">
+    <div class="result-row">
+      <div class="result-lhs">
+        <div class="result-name">Headwind</div>
+        <div class="result-formula">HW = SPD · cos(Δ)</div>
+      </div>
+      <div class="result-rhs">
+        <div class="result-num" id="hwNum">—<span class="unit2">kts</span></div>
+        <div class="result-tag" id="hwTag"></div>
+      </div>
+    </div>
+    <div class="result-row">
+      <div class="result-lhs">
+        <div class="result-name">Crosswind</div>
+        <div class="result-formula">CW = SPD · sin(Δ)</div>
+      </div>
+      <div class="result-rhs">
+        <div class="result-num" id="cwNum">—<span class="unit2">kts</span></div>
+        <div class="result-tag" id="cwTag"></div>
+        <div class="cw-correction" id="cwCorr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIND ROSE -->
+  <div class="rose-card" id="roseCard">
+    <div class="section-label">Wind Rose</div>
+    <div class="rose-center">
+      <canvas id="rose" width="280" height="280" style="width:140px;height:140px;"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const iDir = document.getElementById('iDir');
+const iSpd = document.getElementById('iSpd');
+const iHdg = document.getElementById('iHdg');
+
+// live border feedback
+[iDir, iSpd, iHdg].forEach(el => {
+  el.addEventListener('input', () => {
+    el.classList.toggle('has-value', el.value !== '');
+    el.classList.remove('err');
+  });
+});
+
+document.getElementById('calcBtn').addEventListener('click', calculate);
+[iDir, iSpd, iHdg].forEach(el =>
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); })
+);
+
+function normalize(a) {
+  a = ((a % 360) + 360) % 360;
+  if (a > 180) a -= 360;
+  return a;
+}
+
+function calculate() {
+  // reset errors
+  ['Dir','Spd','Hdg'].forEach(k => {
+    document.getElementById('i'+k).classList.remove('err');
+    document.getElementById('e'+k).classList.remove('show');
+  });
+
+  const dir = parseFloat(iDir.value);
+  const spd = parseFloat(iSpd.value);
+  const hdg = parseFloat(iHdg.value);
+  let ok = true;
+
+  if (isNaN(dir) || dir < 0 || dir > 360) {
+    iDir.classList.add('err'); document.getElementById('eDir').classList.add('show'); ok = false;
+  }
+  if (isNaN(spd) || spd < 0 || spd > 200) {
+    iSpd.classList.add('err'); document.getElementById('eSpd').classList.add('show'); ok = false;
+  }
+  if (isNaN(hdg) || hdg < 0 || hdg > 360) {
+    iHdg.classList.add('err'); document.getElementById('eHdg').classList.add('show'); ok = false;
+  }
+  if (!ok) return;
+
+  const d = dir === 360 ? 0 : dir;
+  const h = hdg === 360 ? 0 : hdg;
+
+  const rel = normalize(d - h);
+  const rad = rel * Math.PI / 180;
+  const hw  = spd * Math.cos(rad);   // + headwind, - tailwind
+  const cw  = spd * Math.sin(rad);   // + from right, - from left
+  const cwA = Math.abs(cw);
+
+  // ── HW ──────────────────────────────────────────────────────────────────
+  const hwEl = document.getElementById('hwNum');
+  const hwTag = document.getElementById('hwTag');
+  hwEl.innerHTML = `${Math.abs(hw).toFixed(1)}<span class="unit2">kts</span>`;
+  if (hw >= 0.05) {
+    hwEl.style.color = 'var(--green)';
+    hwTag.className = 'result-tag tag-hw';
+    hwTag.textContent = '▲ HEADWIND';
+  } else if (hw <= -0.05) {
+    hwEl.style.color = 'var(--red)';
+    hwTag.className = 'result-tag tag-tw';
+    hwTag.textContent = '▼ TAILWIND';
+  } else {
+    hwEl.style.color = 'var(--muted)';
+    hwTag.className = 'result-tag tag-nil';
+    hwTag.textContent = '— NONE';
+  }
+
+  // ── CW ──────────────────────────────────────────────────────────────────
+  const cwEl   = document.getElementById('cwNum');
+  const cwTag  = document.getElementById('cwTag');
+  const cwCorr = document.getElementById('cwCorr');
+  cwEl.innerHTML = `${cwA.toFixed(1)}<span class="unit2">kts</span>`;
+
+  if (cwA < 0.05) {
+    cwEl.style.color = 'var(--muted)';
+    cwTag.className = 'result-tag tag-nil';
+    cwTag.textContent = '— NO CROSSWIND';
+    cwCorr.textContent = '';
+  } else if (cw > 0) {
+    cwEl.style.color = 'var(--amber)';
+    cwTag.className = 'result-tag tag-cw';
+    cwTag.textContent = '➡ FROM RIGHT';
+    cwCorr.textContent = 'Aircraft drifts LEFT — correct with RIGHT rudder';
+  } else {
+    cwEl.style.color = 'var(--amber)';
+    cwTag.className = 'result-tag tag-cw';
+    cwTag.textContent = '⬅ FROM LEFT';
+    cwCorr.textContent = 'Aircraft drifts RIGHT — correct with LEFT rudder';
+  }
+
+  // ── BANNER ──────────────────────────────────────────────────────────────
+  const banner = document.getElementById('banner');
+  const bTitle = document.getElementById('bannerTitle');
+  const bBody  = document.getElementById('bannerBody');
+  banner.className = 'banner show';
+
+  if (cwA > Math.abs(hw)) {
+    banner.classList.add('cw');
+    bTitle.textContent = '⚠️  CROSSWIND DOMINANT';
+    const side = cw > 0.05 ? 'FROM RIGHT — drifts LEFT, correct RIGHT rudder'
+               : cw < -0.05 ? 'FROM LEFT — drifts RIGHT, correct LEFT rudder' : '';
+    bBody.textContent = `CW ${cwA.toFixed(1)} kts ${side}  |  HW ${hw.toFixed(1)} kts`;
+  } else if (hw >= 0) {
+    banner.classList.add('hw');
+    bTitle.textContent = '✅  HEADWIND DOMINANT';
+    bBody.textContent = `HW ${hw.toFixed(1)} kts — favorable for T/O & landing  |  CW ${cwA.toFixed(1)} kts`;
+  } else {
+    banner.classList.add('tw');
+    bTitle.textContent = '🔴  TAILWIND';
+    bBody.textContent = `TW ${Math.abs(hw).toFixed(1)} kts — use caution!  |  CW ${cwA.toFixed(1)} kts`;
+  }
+
+  // show cards
+  document.getElementById('resultsCard').classList.add('show');
+  document.getElementById('roseCard').classList.add('show');
+
+  drawRose(d, h);
+
+  document.getElementById('resultsCard').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ── Wind Rose ────────────────────────────────────────────────────────────────
+function drawRose(windDir, acHdg) {
+  const canvas = document.getElementById('rose');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, r = W*0.37;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // BG
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle='#0f1825'; ctx.fill();
+  ctx.strokeStyle='#1e3a5f'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Rings
+  [0.33,0.66].forEach(f=>{
+    ctx.beginPath(); ctx.arc(cx,cy,r*f,0,Math.PI*2);
+    ctx.strokeStyle='rgba(30,58,95,0.5)'; ctx.lineWidth=1; ctx.stroke();
+  });
+
+  // Cardinals
+  ['N','E','S','W'].forEach((c,i)=>{
+    const a=(i*90-90)*Math.PI/180;
+    ctx.fillStyle='#3a5a7a'; ctx.font='bold 13px -apple-system,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(c, cx+(r+15)*Math.cos(a), cy+(r+15)*Math.sin(a));
+  });
+
+  // Aircraft heading
+  const hRad=(acHdg-90)*Math.PI/180;
+  ctx.beginPath(); ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+r*0.82*Math.cos(hRad), cy+r*0.82*Math.sin(hRad));
+  ctx.strokeStyle='#00b4d8'; ctx.lineWidth=2.5;
+  ctx.setLineDash([6,3]); ctx.stroke(); ctx.setLineDash([]);
+
+  // Aircraft triangle
+  const ax=cx+r*0.82*Math.cos(hRad), ay=cy+r*0.82*Math.sin(hRad);
+  ctx.save(); ctx.translate(ax,ay); ctx.rotate(hRad+Math.PI/2);
+  ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(5,6); ctx.lineTo(-5,6); ctx.closePath();
+  ctx.fillStyle='#00b4d8'; ctx.fill(); ctx.restore();
+
+  // Wind arrow
+  const wRad=(windDir-90)*Math.PI/180;
+  const wSx=cx+r*0.88*Math.cos(wRad), wSy=cy+r*0.88*Math.sin(wRad);
+  const wEx=cx+r*0.18*Math.cos(wRad+Math.PI), wEy=cy+r*0.18*Math.sin(wRad+Math.PI);
+  ctx.beginPath(); ctx.moveTo(wSx,wSy); ctx.lineTo(wEx,wEy);
+  ctx.strokeStyle='#f4a226'; ctx.lineWidth=2.5; ctx.stroke();
+
+  const aAng=Math.atan2(wEy-wSy,wEx-wSx);
+  ctx.save(); ctx.translate(wEx,wEy); ctx.rotate(aAng);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-9,-4); ctx.lineTo(-9,4); ctx.closePath();
+  ctx.fillStyle='#f4a226'; ctx.fill(); ctx.restore();
+
+  ctx.beginPath(); ctx.arc(wSx,wSy,4,0,Math.PI*2);
+  ctx.fillStyle='#f4a226'; ctx.fill();
+
+  // Center
+  ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2);
+  ctx.fillStyle='#00b4d8'; ctx.fill();
+
+  // Legend
+  ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillStyle='#00b4d8'; ctx.fillRect(10,H-34,14,2); ctx.fillText('HDG',28,H-33);
+  ctx.fillStyle='#f4a226'; ctx.fillRect(10,H-18,14,2); ctx.fillText('WIND',28,H-17);
+}
+</script>
+</body>
+</html>
