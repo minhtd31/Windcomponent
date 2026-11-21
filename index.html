@@ -6,7 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="WindCalc">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0f1a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>WindCalc</title>
 <style>
 :root {
@@ -229,34 +232,16 @@ canvas { display: block; }
 
 <script>
 // ── Service Worker (offline support) ────────────────────────────────────────
+// sw.js is a real file (blob: URLs cannot register service workers).
 if ('serviceWorker' in navigator) {
-  const swCode = `
-const CACHE = 'windcalc-v1';
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(['/Windcomponent/', '/Windcomponent/index.html']))
-  );
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
-  );
-});
-`;
-  const blob = new Blob([swCode], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl, { scope: '/Windcomponent/' })
-    .then(() => {
-      document.getElementById('offlineBadge').classList.add('show');
-    })
-    .catch(() => {});
+  navigator.serviceWorker.register('sw.js')
+    .then(() => navigator.serviceWorker.ready)
+    .then(() => document.getElementById('offlineBadge').classList.add('show'))
+    .catch(err => console.warn('SW registration failed', err));
+}
+// Ask the browser not to evict our offline cache.
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().catch(() => {});
 }
 
 // ── App logic ────────────────────────────────────────────────────────────────
