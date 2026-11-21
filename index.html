@@ -316,10 +316,10 @@ function calculate() {
     cwEl.style.color = 'var(--muted)'; cwTag.className = 'result-tag tag-nil'; cwTag.textContent = '— NO CROSSWIND'; cwCorr.textContent = '';
   } else if (cw > 0) {
     cwEl.style.color = 'var(--amber)'; cwTag.className = 'result-tag tag-cw'; cwTag.textContent = '➡ FROM RIGHT';
-    cwCorr.textContent = 'Aircraft drifts LEFT — correct with RIGHT rudder';
+    cwCorr.textContent = 'Drifts LEFT — crab RIGHT into wind · Decrab: LEFT rudder + RIGHT aileron';
   } else {
     cwEl.style.color = 'var(--amber)'; cwTag.className = 'result-tag tag-cw'; cwTag.textContent = '⬅ FROM LEFT';
-    cwCorr.textContent = 'Aircraft drifts RIGHT — correct with LEFT rudder';
+    cwCorr.textContent = 'Drifts RIGHT — crab LEFT into wind · Decrab: RIGHT rudder + LEFT aileron';
   }
 
   const banner = document.getElementById('banner');
@@ -328,7 +328,7 @@ function calculate() {
   banner.className = 'banner show';
   if (cwA > Math.abs(hw)) {
     banner.classList.add('cw'); bTitle.textContent = '⚠️  CROSSWIND DOMINANT';
-    const side = cw > 0.05 ? 'FROM RIGHT — drifts LEFT, correct RIGHT rudder' : cw < -0.05 ? 'FROM LEFT — drifts RIGHT, correct LEFT rudder' : '';
+    const side = cw > 0.05 ? 'FROM RIGHT — drifts LEFT · decrab LEFT rudder, RIGHT aileron' : cw < -0.05 ? 'FROM LEFT — drifts RIGHT · decrab RIGHT rudder, LEFT aileron' : '';
     bBody.textContent = `CW ${cwA.toFixed(1)} kts ${side}  |  HW ${hw.toFixed(1)} kts`;
   } else if (hw >= 0) {
     banner.classList.add('hw'); bTitle.textContent = '✅  HEADWIND DOMINANT';

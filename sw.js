@@ -1,6 +1,6 @@
 // WindCalc service worker — cache-first, works fully offline.
 // Bump VERSION whenever index.html or other files change.
-const VERSION = 'windcalc-v2';
+const VERSION = 'windcalc-v3';
 const ASSETS = [
   './',
   './index.html',
